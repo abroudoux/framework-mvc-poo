@@ -1,10 +1,11 @@
 import requests
+import sqlite3
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin
 from models.model import Book
 from sql.db import save_to_db
 
-def scrappedPage(url):
+def scrapped_page(url):
     page_parsed = BeautifulSoup(requests.get(url).text, 'html.parser')
 
     active_div = page_parsed.find('div', class_='item active')
@@ -39,7 +40,7 @@ def scrappedPage(url):
 
     return book_instance
 
-def scrappedPageCategory(categoryUrl):
+def scrapped_page_category(categoryUrl):
     all_books_links = []
 
     while True:
@@ -59,6 +60,8 @@ def scrappedPageCategory(categoryUrl):
 
         for link_book in links_books:
             print(link_book)
+            scrapped_page(link_book)
+            print("------------")
 
         pager_ul = page_category_parsed.find('ul', class_='pager')
         if pager_ul:
@@ -75,5 +78,32 @@ def scrappedPageCategory(categoryUrl):
             break
 
     return all_books_links
+
+# def save_to_db(book_instance):
+#     with sqlite3.connect('local_database.db') as conn:
+#         cursor = conn.cursor()
+
+#         cursor.execute('''
+#             CREATE TABLE IF NOT EXISTS books (
+#                 title TEXT,
+#                 image_url TEXT,
+#                 alt_text TEXT,
+#                 price TEXT,
+#                 description TEXT
+#             )
+#         ''')
+
+#         cursor.execute('''
+#             INSERT INTO books (title, image_url, alt_text, price, description)
+#             VALUES (:title, :image_url, :alt_text, :price, :description)
+#         ''', {
+#             'title': book_instance.title,
+#             'image_url': book_instance.image_url,
+#             'alt_text': book_instance.alt_text,
+#             'price': book_instance.price,
+#             'description': book_instance.description
+#         })
+
+#         print("livre ajouté à la DB!")
 
 

@@ -24,3 +24,5 @@ def save_to_db(book_instance):
             'price': book_instance.price,
             'description': book_instance.description
         })
+
+        print("livre ajouté à la DB!")

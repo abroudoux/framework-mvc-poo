@@ -1,19 +1,18 @@
 import inquirer
 
-
-def getUrl() :
+def get_url():
     url = input("De quel livre voulez-vous obtenir les informations ? ")
     return url
 
-def getCategory() :
-    categoryList = [
+def get_category_url():
+    category_list = [
         inquirer.List('category',
-                    message="Choisissez votre catégorie : ",
+                    message="Choisissez votre catégorie",
                     choices=['Travel', 'Mystery'],
                 ),
     ]
 
-    answers = inquirer.prompt(categoryList)
+    answers = inquirer.prompt(category_list)
     selected_category = answers["category"]
 
     if selected_category == 'Travel':

@@ -1,7 +1,7 @@
 import inquirer
 
-from controllers.controller import scrappedPage, scrappedPageCategory
-from views.view import getUrl, getCategory
+from controllers.controller import  scrapped_page, scrapped_page_category
+from views.view import get_url, get_category_url
 
 
 def main () :
@@ -17,13 +17,13 @@ def main () :
     selected_mode = answers["mode"]
 
     if selected_mode == 'Book':
-        url = getUrl()
-        book_instance = scrappedPage(url)
+        url = get_url()
+        book_instance = scrapped_page(url)
         print(book_instance)
 
     elif selected_mode == 'Category':
-        categoryUrl = getCategory()
-        scrappedPageCategory(categoryUrl)
+        categoryUrl = get_category_url()
+        scrapped_page_category(categoryUrl)
 
     else:
         print("Mode non reconnu")
