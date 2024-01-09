@@ -1,0 +1,1 @@
+nomEntreprise = input("De quelle entreprise voulez-vous obtenir les informations ?")
