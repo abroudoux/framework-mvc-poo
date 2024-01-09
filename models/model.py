@@ -1,10 +1,7 @@
-class Book:
-    title = ""
-    image_url = ""
-    alt_text = ""
-    price = ""
-    description = ""
+from bs4 import BeautifulSoup
+from urllib.parse import urljoin
 
+class Book:
     def __init__(self, title, image_url, alt_text, price, description) :
         self.title = title
         self.image_url = image_url

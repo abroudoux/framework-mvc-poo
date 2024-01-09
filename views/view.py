@@ -15,7 +15,6 @@ def getCategory() :
 
     answers = inquirer.prompt(categoryList)
     selected_category = answers["category"]
-    print(selected_category)
 
     if selected_category == 'Travel':
         url = "https://books.toscrape.com/catalogue/category/books/travel_2/index.html"

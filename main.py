@@ -1,6 +1,6 @@
 import inquirer
 
-from controllers.controller import scrappedPage
+from controllers.controller import scrappedPage, scrappedPageCategory
 from views.view import getUrl, getCategory
 
 
@@ -23,7 +23,7 @@ def main () :
 
     elif selected_mode == 'Category':
         categoryUrl = getCategory()
-        print(categoryUrl)
+        scrappedPageCategory(categoryUrl)
 
     else:
         print("Mode non reconnu")
