@@ -1,5 +1,6 @@
 import requests
 import os
+import sqlite3
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin
 from models.model import Book
@@ -9,35 +10,26 @@ class Controller:
     mode_config = ['Book', 'Category', 'Delete Database', 'Exit']
 
     def __init__(self):
-        category_config = [
-            {'name': 'Travel', 'url': 'https://books.toscrape.com/catalogue/category/books/travel_2/index.html'},
-            {'name': 'Mystery', 'url': 'https://books.toscrape.com/catalogue/category/books/mystery_3/index.html'},
-        ]
-        self.view = View(self.mode_config, category_config)
+        self.view = View(self.mode_config)
+        self.__create_db()
         self.handle_mode()
-
-    def handle_book_url(self):
-        self.url = self.view.get_book_url()
-        self.scrapped_page_book(self.url)
 
     def handle_mode(self):
         self.selected_choice = self.view.get_mode()
 
         if self.selected_choice == 'Exit':
             exit()
-        else:
-            if self.selected_choice == self.mode_config[0]:
-                self.handle_book_url()
-            elif self.selected_choice == self.mode_config[1]:
-                self.handle_category()
-            elif self.selected_choice == self.mode_config[2]:
-                self.delete_db()
-            else:
-                print("Mode non reconnu")
 
-    def handle_category(self):
-        self.category_url = self.view.get_category_url()
-        self.scrapped_page_category(self.category_url)
+        if self.selected_choice == self.mode_config[0]:
+            self.handle_book_url()
+        elif self.selected_choice == self.mode_config[1]:
+            self.handle_category()
+        elif self.selected_choice == self.mode_config[2]:
+            self.__delete_db()
+
+    def handle_book_url(self):
+        self.url = self.view.get_book_url()
+        self.scrapped_page_book(self.url)
 
     def scrapped_page_book(self, url):
         page_parsed = BeautifulSoup(requests.get(url).text, 'html.parser')
@@ -56,18 +48,22 @@ class Controller:
                 alt_text = "Alt non trouvé"
 
         title_parsed = page_parsed.find('h1')
-        title = title_parsed.text if title_parsed else "Titre non trouvé"
+        title = title_parsed.text if title_parsed else self.view.show_message("Titre non trouvé")
         price_parsed = page_parsed.find('p', 'price_color')
-        price = price_parsed.text if price_parsed else "Prix non trouvé"
+        price = price_parsed.text if price_parsed else self.view.show_message("Prix non trouvé")
         description_div = page_parsed.find('div', id='product_description')
         description_paragraph = description_div.find_next_sibling('p')
-        description = description_paragraph.text if description_paragraph else "Description non trouvée"
+        description = description_paragraph.text if description_paragraph else self.view.show_message("Description non trouvé")
 
         book_instance = Book(title, image_url, alt_text, price, description)
 
-        Book.add_db(self, book_instance)
+        Book.save(self, book_instance)
 
         return book_instance
+
+    def handle_category(self):
+        self.category_url = self.view.get_category_url()
+        self.scrapped_page_category(self.category_url)
 
 
     def scrapped_page_category(self, category_url):
@@ -107,15 +103,36 @@ class Controller:
 
         return all_books_links
 
-    def delete_db(self):
+    def __create_db(self):
+        with sqlite3.connect('books.db') as conn:
+            cursor = conn.cursor()
+
+            cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='books'")
+            table_exists = cursor.fetchone()
+
+            if not table_exists:
+                cursor.execute('''
+                    CREATE TABLE books (
+                        title TEXT,
+                        image_url TEXT,
+                        alt_text TEXT,
+                        price TEXT,
+                        description TEXT
+                    )
+                ''')
+
+                self.__show_db_status("Base de donnée crée")
+
+    def __delete_db(self):
         db_file = 'local_database.db'
 
         if os.path.exists(db_file):
             os.remove(db_file)
-            print("---------")
-            print("Base de données supprimée")
-            print("---------")
+            self.__show_db_status("Base de donnée supprimée")
         else:
-            print("---------")
-            print("La base de données n'existe pas")
-            print("---------")
+            self.__show_db_status("La base de donnée n'existe pas")
+
+    def __show_db_status(self, message):
+        self.view.show_message("---------")
+        self.view.show_message(message)
+        self.view.show_message("---------")

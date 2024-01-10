@@ -1,10 +1,13 @@
 import inquirer
 
 class View:
-    def __init__(self, mode_config, category_config=None):
+    def __init__(self, mode_config):
         self.url = None
-        self.category_config = category_config
         self.mode_config = mode_config
+        self.category_config = [
+            {'name': 'Travel', 'url': 'https://books.toscrape.com/catalogue/category/books/travel_2/index.html'},
+            {'name': 'Mystery', 'url': 'https://books.toscrape.com/catalogue/category/books/mystery_3/index.html'},
+        ]
 
     def __show_questions(self, question, data):
         questions = [
@@ -22,13 +25,12 @@ class View:
 
         if selected_choice == 'Exit':
             exit()
+
+        if selected_choice in self.mode_config:
+            return selected_choice
         else:
-            for mode in self.mode_config:
-                if mode == selected_choice:
-                    return selected_choice
-            else:
-                print("Mode non reconnu")
-                return None
+            print("Mode non reconnu")
+            return None
 
     def get_book_url(self):
         url = input("De quel livre voulez-vous obtenir les informations ? ")
@@ -42,3 +44,6 @@ class View:
         for category in self.category_config:
             if category['name'] == selected_choice:
                 return category['url']
+
+    def show_message(self, message_print):
+        print(message_print)
