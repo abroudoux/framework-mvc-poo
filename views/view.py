@@ -1,46 +1,44 @@
 import inquirer
 
 class View:
-    def __init__(self):
-        self.get_mode()
+    def __init__(self, mode_config, category_config=None):
+        self.url = None
+        self.category_config = category_config
+        self.mode_config = mode_config
 
-    def get_url():
-        url = input("De quel livre voulez-vous obtenir les informations ? ")
-        return url
-
-    def get_category_url():
-        category_list = [
-            inquirer.List('category',
-                        message="Choisissez votre catégorie",
-                        choices=['Travel', 'Mystery'],
-                    ),
-        ]
-
-        answers = inquirer.prompt(category_list)
-        selected_category = answers["category"]
-
-        if selected_category == 'Travel':
-            url = "https://books.toscrape.com/catalogue/category/books/travel_2/index.html"
-            return url
-        elif selected_category == 'Mystery':
-            url = "https://books.toscrape.com/catalogue/category/books/mystery_3/index.html"
-            return url
-        else:
-            print("Mode non reconnu")
-
-    def get_mode(self):
+    def __show_questions(self, question, data):
         questions = [
             inquirer.List('mode',
-                        message="Que voulez-vous récupérer ? ",
-                        choices=['Book', 'Category'],
+                        message=question,
+                        choices=data,
                     ),
         ]
         answers = inquirer.prompt(questions)
-        selected_mode = answers["mode"]
+        selected_choice = answers["mode"]
+        return selected_choice
 
-        if selected_mode == 'Book':
-            return self.get_url
-        elif selected_mode == 'Category':
-            return self.get_category_url
+    def get_mode(self):
+        selected_choice = self.__show_questions("Que voulez-vous faire ?", self.mode_config)
+
+        if selected_choice == 'Exit':
+            exit()
         else:
-            print("Mode non reconnu")
+            for mode in self.mode_config:
+                if mode == selected_choice:
+                    return selected_choice
+            else:
+                print("Mode non reconnu")
+                return None
+
+    def get_book_url(self):
+        url = input("De quel livre voulez-vous obtenir les informations ? ")
+        return url
+
+    def get_category_url(self):
+        categories = [category['name'] for category in self.category_config]
+
+        selected_choice = self.__show_questions("Que voulez-vous faire ?", categories)
+
+        for category in self.category_config:
+            if category['name'] == selected_choice:
+                return category['url']
