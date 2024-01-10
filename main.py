@@ -1,10 +1,13 @@
 import inquirer
+from controllers.controller import  scrapped_page, scrapped_page_category, Controller
+from views.view import get_url, get_category_url, View
 
-from controllers.controller import  scrapped_page, scrapped_page_category
-from views.view import get_url, get_category_url
 
+if __name__ == "__main__":
+    View()
+    Controller()
 
-def main () :
+def main ():
 
     questions = [
         inquirer.List('mode',
