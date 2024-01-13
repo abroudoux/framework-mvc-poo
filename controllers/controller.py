@@ -23,15 +23,16 @@ class Controller:
         if self.selected_choice == self.mode_config[0]:
             self.handle_book_url()
         elif self.selected_choice == self.mode_config[1]:
-            self.handle_category()
+            self.handle_category_url()
         elif self.selected_choice == self.mode_config[2]:
             self.__delete_db()
 
     def handle_book_url(self):
         self.url = self.view.get_book_url()
-        self.scrapped_page_book(self.url)
+        self.__scrapped_page_book(self.url)
+        self.__create_db()
 
-    def scrapped_page_book(self, url):
+    def __scrapped_page_book(self, url):
         page_parsed = BeautifulSoup(requests.get(url).text, 'html.parser')
 
         active_div = page_parsed.find('div', class_='item active')
@@ -57,16 +58,16 @@ class Controller:
 
         book_instance = Book(title, image_url, alt_text, price, description)
 
-        Book.save(self, book_instance)
+        self.__save_db(book_instance)
 
         return book_instance
 
-    def handle_category(self):
+    def handle_category_url(self):
         self.category_url = self.view.get_category_url()
-        self.scrapped_page_category(self.category_url)
+        self.__scrapped_page_category(self.category_url)
+        self.__create_db()
 
-
-    def scrapped_page_category(self, category_url):
+    def __scrapped_page_category(self, category_url):
         all_books_links = []
 
         while True:
@@ -84,7 +85,7 @@ class Controller:
             all_books_links.extend(books_links)
 
             for link_book in books_links:
-                self.scrapped_page_book(link_book)
+                self.__scrapped_page_book(link_book)
 
             pager_ul = page_category_parsed.find('ul', class_='pager')
 
@@ -123,8 +124,26 @@ class Controller:
 
                 self.__show_db_status("Base de donnée crée")
 
+    def __save_db(self, book_instance):
+        with sqlite3.connect('books.db') as conn:
+            cursor = conn.cursor()
+
+            cursor.execute('''
+                INSERT INTO books (title, image_url, alt_text, price, description)
+                VALUES (:title, :image_url, :alt_text, :price, :description)
+            ''', {
+                'title': book_instance.title,
+                'image_url': book_instance.image_url,
+                'alt_text': book_instance.alt_text,
+                'price': book_instance.price,
+                'description': book_instance.description
+            })
+
+            conn.commit()
+            self.__show_db_status(f"{book_instance.title} ajouté à la base de données")
+
     def __delete_db(self):
-        db_file = 'local_database.db'
+        db_file = 'books.db'
 
         if os.path.exists(db_file):
             os.remove(db_file)

@@ -39,7 +39,7 @@ class View:
     def get_category_url(self):
         categories = [category['name'] for category in self.category_config]
 
-        selected_choice = self.__show_questions("Que voulez-vous faire ?", categories)
+        selected_choice = self.__show_questions("Quelle catégorie voulez-vous sélectionner ?", categories)
 
         for category in self.category_config:
             if category['name'] == selected_choice:
